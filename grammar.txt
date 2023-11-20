@@ -1,26 +1,31 @@
-start/START
+START
 ..(ceva operatii)...; #end line with(;)
 #tipuri de date :  int float char bool
 int x;
-x=5;
+auto zero after initialization of variable
+x = 5;
+trebuie sa initializam mai inainte 
 input(x); tastarea de la keyboard 
-auto zero after initialization of variable 
-x += y; => x= x+y
-x++ => x= x+1
-x-- => x= x-1
+x = (5 add 6) mult 7
+operatii [add, mult, sub, div] trebue sa fie intre doua variabile(cifre)
 x^6 or x^(y-1) => pow(x,6) or pow(x,y-1)
-new(old:x, new:x^(y-1)) => x=x^(y-1)
+new(old:x, new:x^(y-1)) => x = x^(y-1)
 if (n>8) #necessary bracets for all conditions {}
 x *= y  => x = x*y
 z = x*y
 
 loops =>    1.  for i to n{...};
-            2.  while (i<n){...};
+	    2.  for i downto n{...};
+            3.  while (i<n){...};
+	    4.  while !(i<n){...};
 
 conditions =>  1. !=
                2. ==
-	       3. 	
+	       3. <
+	       4. >
+	       5. <=
+	       6. >=	
 
 
 
-end/END
+END
