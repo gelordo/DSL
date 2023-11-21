@@ -34,3 +34,25 @@ typedef enum {
     TOKEN_FOR_DECREASE,
     TOKEN_WHILE,
 } TokenType;
+
+Token* tokenize_file(const char* filename) {
+    // Открытие файла для чтения
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        perror("Unable to open file");
+        exit(EXIT_FAILURE);
+    }
+    Token* tokens = malloc(MAX_TOKENS * sizeof(Token));
+    int tokenCount = 0;
+
+    // Чтение файла и токенизация
+    char buffer[1024];
+    while (fgets(buffer, sizeof(buffer), file)) {
+        // Ваша логика токенизации для строки 'buffer'
+        // ...
+    }    // Закрытие файла
+    fclose(file);
+
+    // Возвращение массива токенов
+    return tokens;
+}
