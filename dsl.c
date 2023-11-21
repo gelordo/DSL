@@ -55,4 +55,6 @@ Token* tokenize_file(const char* filename) {
 
     // Возвращение массива токенов
     return tokens;
+	
+	//LOLOLOLLOLOLOLOLOLO
 }
