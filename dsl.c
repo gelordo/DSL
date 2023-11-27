@@ -56,3 +56,22 @@ Token* tokenize_file(const char* filename) {
     // Возвращение массива токенов
     return tokens;
 }
+void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProgram) {
+    const char* current = line;
+
+    while (*current) {
+        if (strncmp(current, "START", 5) == 0 && !(*inProgram)) {
+            tokens[(*tokenCount)++] = (Token){TOKEN_START, NULL};
+            current += 5; // Перемещение указателя за "START"
+            *inProgram = 1; // Установка флага, что мы внутри программы
+        } else if (strncmp(current, "END", 3) == 0 && *inProgram) {
+            tokens[(*tokenCount)++] = (Token){TOKEN_END, NULL};
+            current += 3; // Перемещение указателя за "END"
+            *inProgram = 0; // Сброс флага, т.к. мы достигли конца программы
+        } else if (*inProgram) {
+            // Ваши обычные условия токенизации здесь...
+        } else {
+            // Игнорируем символы до "START" или после "END"
+        }
+    }
+}
