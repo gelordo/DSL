@@ -66,6 +66,8 @@ void tokenize_file(const char* filename) {
 
 void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProgram) {
     const char* current = line;
+    char* value;
+    size_t length;
 
     while (*current) {
         if (strncmp(current, "START", 5) == 0 && !(*inProgram)) {
@@ -89,7 +91,7 @@ void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProg
         } else if (strncmp(current, "<=", 2) == 0) {
             tokens[(*tokenCount)++] = (Token){TOKEN_LESS_EQ, NULL};
             current += 2;
-        } else {
+        } else if{
             switch (*current) {
                 case '+':
                     tokens[(*tokenCount)++] = (Token){TOKEN_ADDITION, NULL};
@@ -151,20 +153,20 @@ void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProg
                             current++;
                         }
                         if (*current == '.' && isdigit(*(current + 1))) { // Проверка на вещественное число
-                            current += 2; // Пропуск точки и одной цифры после неё
+                            // Включить точку и одну цифру после неё
+                            length = current - start_nm + 2;
+                            current += 2; // Пропуск точки и цифры после неё
+                        } else { // Целое число
                             length = current - start_nm;
-                            numberStr = (char*)malloc(length + 1);
-                            strncpy(numberStr, start, length);
-                            numberStr[length] = '\0';
-                            tokens[(*tokenCount)++] = (Token){TOKEN_FLOAT, numberStr};
-                        } else {
-                            length = current - start;
-                            numberStr = (char*)malloc(length + 1);
-                            strncpy(numberStr, start, length);
-                            numberStr[length] = '\0';
-                            tokens[(*tokenCount)++] = (Token){TOKEN_INT, numberStr};
                         }
-                    } else if (isalpha(*current)) {
+                        value = (char*)malloc(length + 1);
+                        strncpy(value, start_nm, length);
+                        value[length] = '\0';
+                        tokens[(*tokenCount)++] = (Token){
+                            (*current == '.' && isdigit(*(current - 1))) ? TOKEN_FLOAT : TOKEN_INT, value
+                        length = 0;
+                        };
+                    } else if (isalpha(*current) || *current == '_') {
                         if (strncmp(current, "add", 3) == 0) {
                         tokens[(*tokenCount)++] = (Token){TOKEN_ADDITION, NULL};
                         current += 3;
@@ -192,19 +194,19 @@ void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProg
                         } else if (strncmp(current, "while", 5) == 0) {
                         tokens[(*tokenCount)++] = (Token){TOKEN_WHILE, NULL};
                         current += 5;
-                        }                  
-                        else{
+                        } else {
                             const char* start_id = current;
-                            while (isdigit(*current)) { // Собрать целую часть
+                            while (isalpha(*current) || isdigit(*current) || *current == '_') {
                                 current++;
                             }
                             length = current - start_id;
-                            identificator_Str = (char*)malloc(length + 1);
-                            strncpy(identificator_Str, start_id, length);
-                            identificator_Str[length] = '\0';
-                            tokens[(*tokenCount)++] = (Token){TOKEN_IDENTIFIER, identificator_Str};
-                        }    
-                    } else if (isspace(*current)) {
+                            value = (char*)malloc(length + 1);
+                            strncpy(value, start_id, length);
+                            value[length] = '\0';
+                            tokens[(*tokenCount)++] = (Token){TOKEN_IDENTIFIER, value};
+                            length = 0;
+                        }
+                      } else if (isspace(*current)) {
                         tokens[(*tokenCount)++] = (Token){TOKEN_SPACE, NULL};
                         // Пропускаем пробельные символы
                         current++;
