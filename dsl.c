@@ -20,10 +20,10 @@ typedef enum {
     TOKEN_R_PAREN,
     TOKEN_L_BRACE,
     TOKEN_R_BRACE,
-    TOKEN_INPUT,
     TOKEN_EQUAL,
     TOKEN_NOT,
     TOKEN_SAME,
+    TOKEN_NOT_SAME,
     TOKEN_GREATER,
     TOKEN_LESS,
     TOKEN_GREATER_EQ,
@@ -77,33 +77,145 @@ void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProg
             current += 3; // Перемещение указателя за "END"
             *inProgram = 0; // Сброс флага, т.к. мы достигли конца программы
         } else if (*inProgram) {
-            while (*current) {
-        switch (*current) {
-            case '+':
-                tokens[(*tokenCount)++] = (Token){TOKEN_ADDITION, NULL};
-                current++;
-                break;
-            case '-':
-                tokens[(*tokenCount)++] = (Token){TOKEN_SUBTRACTION, NULL};
-                current++;
-                break;
-            // Другие символы...
-            default:
-                if (isdigit(*current)) {
-                    // Здесь должна быть логика для обработки чисел
-                } else if (isalpha(*current)) {
-                    // Здесь должна быть логика для обработки идентификаторов и ключевых слов
-                } else if (isspace(*current)) {
-                    // Пропускаем пробельные символы
-                    current++;
-                } else {
-                    // Обработка ошибок: нераспознанный символ
-                }
-                break;
-        }
-    }.
+            if (strncmp(current, "==", 2) == 0) {
+            tokens[(*tokenCount)++] = (Token){TOKEN_SAME, NULL};
+            current += 2;
+        } else if (strncmp(current, "!=", 2) == 0) {
+            tokens[(*tokenCount)++] = (Token){TOKEN_NOT_SAME, NULL};
+            current += 2;
+        } else if (strncmp(current, ">=", 2) == 0) {
+            tokens[(*tokenCount)++] = (Token){TOKEN_GREATER_EQ, NULL};
+            current += 2;
+        } else if (strncmp(current, "<=", 2) == 0) {
+            tokens[(*tokenCount)++] = (Token){TOKEN_LESS_EQ, NULL};
+            current += 2;
         } else {
-            // Игнорируем символы до "START" или после "END"
+            switch (*current) {
+                case '+':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_ADDITION, NULL};
+                    current++;
+                    break;
+                case '-':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_SUBTRACTION, NULL};
+                    current++;
+                    break;
+                case '*':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_MULTIPLICATION, NULL};
+                    current++;
+                    break;
+                case '/':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_DIVISION, NULL};
+                    current++;
+                    break;
+                case '(':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_L_PAREN, NULL};
+                    current++;
+                    break;
+                case ')':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_R_PAREN, NULL};
+                    current++;
+                    break;
+                case ';':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_END_LINE, NULL};
+                    current++;
+                    break;
+                case '{':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_L_BRACE, NULL};
+                    current++;
+                    break;
+                case '}':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_R_BRACE, NULL};
+                    current++;
+                    break;
+                case '>':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_GREATER, NULL};
+                    current++;
+                    break;
+                case '<':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_LESS, NULL};
+                    current++;
+                    break;
+                case '=':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_EQUAL, NULL};
+                    current++;
+                    break;
+                case '!':
+                    tokens[(*tokenCount)++] = (Token){TOKEN_NOT, NULL};
+                    current++;
+                    break;
+                // Другие символы...
+                default:
+                    if (isdigit(*current)) {
+                        const char* start_nm = current;
+                        while (isdigit(*current)) { // Собрать целую часть
+                            current++;
+                        }
+                        if (*current == '.' && isdigit(*(current + 1))) { // Проверка на вещественное число
+                            current += 2; // Пропуск точки и одной цифры после неё
+                            length = current - start_nm;
+                            numberStr = (char*)malloc(length + 1);
+                            strncpy(numberStr, start, length);
+                            numberStr[length] = '\0';
+                            tokens[(*tokenCount)++] = (Token){TOKEN_FLOAT, numberStr};
+                        } else {
+                            length = current - start;
+                            numberStr = (char*)malloc(length + 1);
+                            strncpy(numberStr, start, length);
+                            numberStr[length] = '\0';
+                            tokens[(*tokenCount)++] = (Token){TOKEN_INT, numberStr};
+                        }
+                    } else if (isalpha(*current)) {
+                        if (strncmp(current, "add", 3) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_ADDITION, NULL};
+                        current += 3;
+                        } else if (strncmp(current, "sub", 3) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_SUBTRACTION, NULL};
+                        current += 3;
+                        } else if (strncmp(current, "mult", 4) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_MULTIPLICATION, NULL};
+                        current += 4;
+                        } else if (strncmp(current, "div", 3) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_DIVISION, NULL};
+                        current += 3;
+                        } else if (strncmp(current, "if", 2) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_IF, NULL};
+                        current += 2;
+                        } else if (strncmp(current, "for", 3) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_FOR, NULL};
+                        current += 3;
+                        } else if (strncmp(current, "to", 2) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_FOR_INCREASE, NULL};
+                        current += 2;
+                        } else if (strncmp(current, "downto", 6) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_FOR_DECREASE, NULL};
+                        current += 6;
+                        } else if (strncmp(current, "while", 5) == 0) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_WHILE, NULL};
+                        current += 5;
+                        }                  
+                        else{
+                            const char* start_id = current;
+                            while (isdigit(*current)) { // Собрать целую часть
+                                current++;
+                            }
+                            length = current - start_id;
+                            identificator_Str = (char*)malloc(length + 1);
+                            strncpy(identificator_Str, start_id, length);
+                            identificator_Str[length] = '\0';
+                            tokens[(*tokenCount)++] = (Token){TOKEN_IDENTIFIER, identificator_Str};
+                        }    
+                    } else if (isspace(*current)) {
+                        tokens[(*tokenCount)++] = (Token){TOKEN_SPACE, NULL};
+                        // Пропускаем пробельные символы
+                        current++;
+                    } else {
+                        // Обработка ошибок: нераспознанный символ
+                    }
+                    break;}
+        } else {
+        // Игнорируем символы до "START" или после "END"
+        }
+    
         }
     }
 }
