@@ -35,7 +35,7 @@ typedef enum {
     TOKEN_WHILE,
 } TokenType;
 
-void tokenize_file(const char* filename) {
+Token* tokenize_file(const char* filename, int* tokenCount) {
     FILE* file = fopen(filename, "r");
     if (!file) {
         perror("Unable to open file");
@@ -48,20 +48,23 @@ void tokenize_file(const char* filename) {
 
     // Массив токенов и счётчик токенов
     Token* tokens = malloc(MAX_TOKENS * sizeof(Token));
-    int tokenCount = 0;
+    if (tokens == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+    *tokenCount = 0;
 
     while (fgets(line, sizeof(line), file)) {
         line_number++;
-        tokenize_line(line, tokens, &tokenCount, &inProgram);
+        tokenize_line(line, tokens, tokenCount, &inProgram);
         // Если мы вышли за END, можно прервать чтение файла
         if (!inProgram) break;
     }
 
     fclose(file);
-
-    // Далее идет код для обработки токенов, а также для очистки памяти
-
-    free(tokens);
+    
+    return tokens;
 }
 
 void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProgram) {
@@ -93,22 +96,6 @@ void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProg
             current += 2;
         } else if{
             switch (*current) {
-                case '+':
-                    tokens[(*tokenCount)++] = (Token){TOKEN_ADDITION, NULL};
-                    current++;
-                    break;
-                case '-':
-                    tokens[(*tokenCount)++] = (Token){TOKEN_SUBTRACTION, NULL};
-                    current++;
-                    break;
-                case '*':
-                    tokens[(*tokenCount)++] = (Token){TOKEN_MULTIPLICATION, NULL};
-                    current++;
-                    break;
-                case '/':
-                    tokens[(*tokenCount)++] = (Token){TOKEN_DIVISION, NULL};
-                    current++;
-                    break;
                 case '(':
                     tokens[(*tokenCount)++] = (Token){TOKEN_L_PAREN, NULL};
                     current++;
@@ -211,13 +198,19 @@ void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProg
                         // Пропускаем пробельные символы
                         current++;
                     } else {
-                        // Обработка ошибок: нераспознанный символ
+                        fprintf(stderr, "Unknown symbol '%c' at line %d\n", *current, line_number);
+                        current++;
                     }
-                    break;}
-        } else {
-        // Игнорируем символы до "START" или после "END"
-        }
+                    break;
+                }
     
+            }
         }
     }
+}
+void free_tokens(Token* tokens, int tokenCount) {
+    for (int i = 0; i < tokenCount; i++) {
+        free(tokens[i].value); // Предполагая, что 'value' была динамически выделена.
+    }
+    free(tokens);
 }
