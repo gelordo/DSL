@@ -1,9 +1,8 @@
-// dsl.h
-#ifndef DSL_H
-#define DSL_H
+#ifndef LEXER_H
+#define LEXER_H
+
 #define MAX_TOKENS 1024
 
-// Типы токенов
 typedef enum {
     TOKEN_INT,
     TOKEN_FLOAT,
@@ -33,19 +32,18 @@ typedef enum {
     TOKEN_FOR,
     TOKEN_FOR_INCREASE,
     TOKEN_FOR_DECREASE,
-    TOKEN_WHILE,
+    TOKEN_WHILE
 } TokenType;
 
-// Структура токена
 typedef struct {
     TokenType type;
     char* value;
 } Token;
 
-// Функция токенизации файла
 Token* tokenize_file(const char* input, int* tokenCount);
 
-// Функция освобождения массива токенов
 void free_tokens(Token* tokens, int tokenCount);
 
-#endif // DSL_H
+void tokenize_line(const char* line, Token* tokens, int* tokenCount, int* inProgram);
+
+#endif
